@@ -60,6 +60,17 @@ public class ByufenController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/stretch")
+    public ResponseEntity<String> stretchGoal(@RequestParam("fen") String fen) {
+        try {
+            String updatedFen = getSuggestedMove(fen);
+            String board = new ByufenPrinter().printBoard(updatedFen);
+            return ResponseEntity.status(HttpStatus.OK).body("" + "Updated FEN: " + updatedFen + "\n\n" + board);
+        } catch (IOException | ByufenException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     private String getSuggestedMove(String fen) throws IOException, ByufenException {
         ByufenValidator.getInstance().validate(fen);
         URL fenService = establishURLConnection(fen);
@@ -78,10 +89,58 @@ public class ByufenController {
         char[] expandedPPD = generateExpandedPiecePlacementData(piecePlacementData).toCharArray();
         int fromSquare = determineSquare(suggestedMove.substring(0, 2));
         int toSquare = determineSquare(suggestedMove.substring(2, 4));
+        char pieceAtFromSquare = expandedPPD[fromSquare];
+        char pieceAtToSquare = expandedPPD[toSquare];
         expandedPPD[toSquare] = expandedPPD[fromSquare];
         expandedPPD[fromSquare] = '-';
+        if (isCastlingMove(fromSquare, toSquare, pieceAtFromSquare)) {
+            handleCastle(fromSquare, toSquare, expandedPPD);
+        }
+        if (determineSquare(dataElements[3]) == toSquare /*En Passant*/) {
+            handleEnPassant(fromSquare, toSquare, expandedPPD);
+        }
         dataElements[0] = generateFenPiecePlacementData(String.valueOf(expandedPPD));
         return String.join(" ", dataElements);
+    }
+
+    private void handleEnPassant(int fromSquare, int toSquare, char[] expandedPPD) {
+        if (toSquare >= 40 && toSquare <= 47) {
+            expandedPPD[toSquare - 8] = '-';
+        } else if (toSquare >= 16 && toSquare <= 23) {
+            expandedPPD[toSquare + 8] = '-';
+        }
+    }
+
+    private void handleCastle(int fromSquare, int toSquare, char[] expandedPPD) {
+        // e1 - g1, white kingside castling
+        if (toSquare == 62) {
+            expandedPPD[63] = '-';
+            expandedPPD[61] = 'R';
+        }
+        // e1 - c1, white queenside castling
+        else if (toSquare == 58) {
+            expandedPPD[56] = '-';
+            expandedPPD[59] = 'R';
+        }
+        // e8 - g8, white kingside castling
+        else if (toSquare == 6) {
+            expandedPPD[7] = '-';
+            expandedPPD[5] = 'R';
+        }
+        // e8 - c8, white queenside castling
+        else if (toSquare == 2) {
+            expandedPPD[0] = '-';
+            expandedPPD[3] = 'R';
+        }
+    }
+
+    private boolean isCastlingMove(int fromSquare, int toSquare, char pieceAtFromSquare) {
+        if (pieceAtFromSquare == 'K' && fromSquare == 60 /*e1*/) {
+            return (toSquare == 62 || toSquare == 58);
+        } else if (pieceAtFromSquare == 'k' && fromSquare == 4 /*e8*/) {
+            return (toSquare == 6 || toSquare == 2);
+        }
+        return false;
     }
 
     private String generateFenPiecePlacementData(String expandedPPD) {
