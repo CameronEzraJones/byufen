@@ -2,6 +2,7 @@ package com.example.byufen;
 
 import com.example.byufen.util.ByufenException;
 import com.example.byufen.util.ByufenPrinter;
+import com.example.byufen.util.ByufenURLWrapper;
 import com.example.byufen.util.ByufenValidator;
 import com.google.common.base.CharMatcher;
 import com.google.gson.JsonElement;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map;
 
 /**
@@ -73,11 +72,11 @@ public class ByufenController {
 
     private String getSuggestedMove(String fen) throws IOException, ByufenException {
         ByufenValidator.getInstance().validate(fen);
-        URL fenService = establishURLConnection(fen);
+        ByufenURLWrapper fenService = establishURLConnection(fen);
         String data = readDataFromURLConnection(fenService);
         JsonObject object = new JsonParser().parse(data).getAsJsonObject();
         String suggestedMove = determineSuggestedMove(object);
-        if (!suggestedMove.matches("^[a-h][1-8][a-h][1-8]")) {
+        if (!suggestedMove.matches("^[a-h][1-8][a-h][1-8][pnbrq]?")) {
             throw new ByufenException("The suggested move was formatted incorrectly");
         }
         return movePiece(fen, suggestedMove);
@@ -96,8 +95,12 @@ public class ByufenController {
         if (isCastlingMove(fromSquare, toSquare, pieceAtFromSquare)) {
             handleCastle(fromSquare, toSquare, expandedPPD);
         }
-        if (determineSquare(dataElements[3]) == toSquare /*En Passant*/) {
+        if (!dataElements[3].equals("-") && determineSquare(dataElements[3]) == toSquare /*En Passant*/) {
             handleEnPassant(fromSquare, toSquare, expandedPPD);
+        }
+        if (suggestedMove.length() == 5 /*Pawn promotion*/) {
+            expandedPPD[toSquare] = dataElements[1].equals("w") ? Character.toUpperCase(suggestedMove.charAt(4))
+                    : suggestedMove.charAt(4);
         }
         dataElements[0] = generateFenPiecePlacementData(String.valueOf(expandedPPD));
         return String.join(" ", dataElements);
@@ -122,15 +125,15 @@ public class ByufenController {
             expandedPPD[56] = '-';
             expandedPPD[59] = 'R';
         }
-        // e8 - g8, white kingside castling
+        // e8 - g8, black kingside castling
         else if (toSquare == 6) {
             expandedPPD[7] = '-';
-            expandedPPD[5] = 'R';
+            expandedPPD[5] = 'r';
         }
-        // e8 - c8, white queenside castling
+        // e8 - c8, black queenside castling
         else if (toSquare == 2) {
             expandedPPD[0] = '-';
-            expandedPPD[3] = 'R';
+            expandedPPD[3] = 'r';
         }
     }
 
@@ -189,7 +192,7 @@ public class ByufenController {
         }
     }
 
-    private String readDataFromURLConnection(URL fenService) throws IOException {
+    private String readDataFromURLConnection(ByufenURLWrapper fenService) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(fenService.openStream()));
         String inputLine;
         StringBuilder data = new StringBuilder();
@@ -199,10 +202,8 @@ public class ByufenController {
         return data.toString();
     }
 
-    private URL establishURLConnection(String fen) throws IOException {
+    private ByufenURLWrapper establishURLConnection(String fen) throws IOException {
         String url = "https://syzygy-tables.info/api/v2?fen=" + CharMatcher.is(' ').replaceFrom(fen, "%20");
-        URL fenService = new URL(url);
-        URLConnection conn = fenService.openConnection();
-        return fenService;
+        return new ByufenURLWrapper(url);
     }
 }
