@@ -44,7 +44,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"a2a3\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"a2a3\":{}}}".getBytes()));
         String updatedFen = "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -55,29 +55,29 @@ public class ByufenApplicationTask2Tests {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"a7a5\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"a7a5\":{}}}".getBytes()));
         String updatedFen = "rnbqkbnr/1p1ppppp/8/p1p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
     }
 
     @Test
-    public void testValidDoMoveBestMovePreference() throws Exception {
+    public void testValidDoMovesPreference() throws Exception {
         String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
         when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"a2a3\",\"moves\":{\"a2a4\":{}}}".getBytes()));
-        String updatedFen = "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
+        String updatedFen = "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
     }
 
     @Test
-    public void testValidDoMoveUseFirstMovesSuggestionIfNoBestMove() throws Exception {
+    public void testValidDoMoveUseBestMoveifNoMoves() throws Exception {
         String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"a2a3\",\"moves\":{\"a2a4\":{},\"b2b3\":{}}}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"a2a3\"}".getBytes()));
         String updatedFen = "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -88,7 +88,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "4k3/8/8/8/8/8/8/4K2R w K - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"e1g1\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"e1g1\":{}}}".getBytes()));
         String updatedFen = "4k3/8/8/8/8/8/8/5RK1 w K - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -99,7 +99,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "4k3/8/8/8/8/8/8/R3K3 w Q - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"e1c1\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"e1c1\":{}}}".getBytes()));
         String updatedFen = "4k3/8/8/8/8/8/8/2KR4 w Q - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -110,7 +110,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "4k2r/8/8/8/8/8/8/4K3 b k - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"e8g8\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"e8g8\":{}}}".getBytes()));
         String updatedFen = "5rk1/8/8/8/8/8/8/4K3 b k - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -121,7 +121,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "r3k3/8/8/8/8/8/8/4K3 b q - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"e8c8\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"e8c8\":{}}}".getBytes()));
         String updatedFen = "2kr4/8/8/8/8/8/8/4K3 b q - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -132,7 +132,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "4k3/8/8/2Pp4/8/8/8/4K3 w - d6 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"c5d6\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"c5d6\":{}}}".getBytes()));
         String updatedFen = "4k3/8/3P4/8/8/8/8/4K3 w - d6 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -143,7 +143,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "4k3/8/8/8/2Pp4/8/8/4K3 b - c3 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"d4c3\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"d4c3\":{}}}".getBytes()));
         String updatedFen = "4k3/8/8/8/8/2p5/8/4K3 b - c3 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -154,7 +154,7 @@ public class ByufenApplicationTask2Tests {
         String fen = "4k3/2P5/4K3/8/8/8/8/8 w - - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"c7c8q\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"c7c8q\":{}}}".getBytes()));
         String updatedFen = "2Q1k3/8/4K3/8/8/8/8/8 w - - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
@@ -165,11 +165,31 @@ public class ByufenApplicationTask2Tests {
         String fen = "8/8/8/8/8/4k3/2p5/4K3 b - - 0 1";
         ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
         PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
-        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"bestmove\":\"c2c1q\"}".getBytes()));
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{\"c2c1q\":{}}}".getBytes()));
         String updatedFen = "8/8/8/8/8/4k3/8/2q1K3 b - - 0 1";
         this.mockMvc.perform(get("/task2?fen=" + fen))
                 .andDo(print()).andExpect(status().isOk()).andExpect(content().string(containsString(updatedFen)));
     }
 
+    @Test
+    public void testInvalidResponseEmptyMoves() throws Exception {
+        String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
+        PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{\"moves\":{}}".getBytes()));
+        String error = "The moves property didn't return a valid move";
+        this.mockMvc.perform(get("/task2?fen=" + fen))
+                .andDo(print()).andExpect(status().isBadRequest()).andExpect(content().string(containsString(error)));
+    }
 
+    @Test
+    public void testInvalidResponseEmptyResponse() throws Exception {
+        String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        ByufenURLWrapper mockURL = mock(ByufenURLWrapper.class);
+        PowerMockito.whenNew(ByufenURLWrapper.class).withAnyArguments().thenReturn(mockURL);
+        when(mockURL.openStream()).thenReturn(new ByteArrayInputStream("{}".getBytes()));
+        String error = "The response didn't contain any suggested moves";
+        this.mockMvc.perform(get("/task2?fen=" + fen))
+                .andDo(print()).andExpect(status().isBadRequest()).andExpect(content().string(containsString(error)));
+    }
 }

@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by cejon on 6/30/2017.
@@ -76,7 +78,7 @@ public class ByufenController {
         String data = readDataFromURLConnection(fenService);
         JsonObject object = new JsonParser().parse(data).getAsJsonObject();
         String suggestedMove = determineSuggestedMove(object);
-        if (!suggestedMove.matches("^[a-h][1-8][a-h][1-8][pnbrq]?")) {
+        if (!suggestedMove.matches("^[a-h][1-8][a-h][1-8][nbrq]?")) {
             throw new ByufenException("The suggested move was formatted incorrectly");
         }
         return movePiece(fen, suggestedMove);
@@ -179,16 +181,18 @@ public class ByufenController {
         return (8 - (squareCoords.charAt(1) - '0')) * 8 + (squareCoords.charAt(0) - 'a');
     }
 
-    private String determineSuggestedMove(JsonObject object) {
-        if (object.has("bestmove") && !object.get("bestmove").isJsonNull()) {
-            return object.getAsJsonPrimitive("bestmove").getAsString();
-        } else if (object.has("moves") && object.getAsJsonObject("moves") != null) {
-            for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("moves").entrySet()) {
-                return entry.getKey();
+    private String determineSuggestedMove(JsonObject object) throws ByufenException {
+        if (object.has("moves") && object.getAsJsonObject("moves") != null) {
+            Set<Map.Entry<String, JsonElement>> entries = object.getAsJsonObject("moves").entrySet();
+            Iterator<Map.Entry<String, JsonElement>> iter = entries.iterator();
+            if (iter.hasNext()) {
+                return iter.next().getKey();
             }
-            return "";
+            throw new ByufenException("The moves property didn't return a valid move");
+        } else if (object.has("bestmove") && !object.get("bestmove").isJsonNull()) {
+            return object.getAsJsonPrimitive("bestmove").getAsString();
         } else {
-            return "";
+            throw new ByufenException("The response didn't contain any suggested moves");
         }
     }
 
