@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(SpringRunner.class)
 @WebMvcTest
-public class ByufenApplicationTestTask2 {
+public class ByufenApplicationTask2Tests {
 
     final String fenServiceBase = "https://syzygy-tables.info/api/v2?fen=";
     @Autowired

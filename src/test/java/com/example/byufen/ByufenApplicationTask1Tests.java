@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest
-public class ByufenApplicationTestTask1 {
+public class ByufenApplicationTask1Tests {
 
     @Autowired
     private MockMvc mockMvc;
